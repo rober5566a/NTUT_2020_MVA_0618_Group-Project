@@ -3,19 +3,22 @@ import random
 import torch
 from find_file_name import *
 from torch.utils.data import Dataset, DataLoader
+from pre_process import dip_pre_process
 
 
 class ImgDataset(Dataset):
 
-    def __init__(self, path):
+    def __init__(self, path, isTrain=False):
         file_extension = "jpg"
         filenames = get_filenames(path, file_extension)
         random.shuffle(filenames)  # random sort files
 
         img_h = 128  # img resize hight
         img_w = 82  # img resize width
+
         (datas, labels) = organize_dataset(
-            filenames, img_h, img_w, isOneHotEncod=False)
+            filenames, img_h, img_w, isTrain=isTrain, isOneHotEncod=False)
+        print("total_train-datasets: ", labels.shape[0])
 
         self.datas = datas
         self.labels = labels
@@ -58,32 +61,52 @@ def get_one_hot_encoding(labels_v, NUM_CLASS):
 
 
 # organising datas & labels
-def organize_dataset(filenames, img_h, img_w, isOneHotEncod=False):
+def organize_dataset(filenames, img_h, img_w, isTrain=False, isOneHotEncod=False):
     imgs = torch.tensor([], dtype=torch.uint8)
     # # labels = torch.tensor([], dtype=torch.int8)
     labels_v = []
     labels_dict = classifer_labels(filenames)
     for filename in filenames:
         # data part: reshape -> reshape -> turn to tensor
-        img = cv2.imread(filename)
-        img = cv2.resize(img, (img_h, img_w))
-
+        raw_img = cv2.imread(filename)
+        raw_img = cv2.resize(raw_img, (img_h, img_w))
         # cv2.imshow('img', img)
         # cv2.waitKey(0)
 
-        # # print(type(img))
-        img = torch.from_numpy(img)
-        img = torch.reshape(img, (img.shape[2], img.shape[0], img.shape[1]))
-        img = img.unsqueeze(0)
-        try:
-            imgs = torch.cat((imgs, img), 0)
-        except ValueError:
-            imgs = img
+        if isTrain is True:
+            # use raw-img increase img by dip
+            pre_imgs = dip_pre_process(raw_img, num_create=20)
+            # # print(type(img))
+            for img in pre_imgs:
+                img = torch.from_numpy(img)
+                img = torch.reshape(
+                    img, (img.shape[2], img.shape[0], img.shape[1]))
+                img = img.unsqueeze(0)
+                try:
+                    imgs = torch.cat((imgs, img), 0)
+                except ValueError:
+                    imgs = img
+        else:
+            img = raw_img
+
+            img = torch.from_numpy(img)
+            img = torch.reshape(
+                img, (img.shape[2], img.shape[0], img.shape[1]))
+            img = img.unsqueeze(0)
+            try:
+                imgs = torch.cat((imgs, img), 0)
+            except ValueError:
+                imgs = img
 
         # label part: get classifer name
         label = filename.split('/')[2]
-        label_v = labels_dict.get(label)
-        labels_v.append(label_v)
+        if isTrain is True:
+            for i in range(pre_imgs.shape[0]):
+                label_v = labels_dict.get(label)
+                labels_v.append(label_v)
+        else:
+            label_v = labels_dict.get(label)
+            labels_v.append(label_v)
 
     if isOneHotEncod is True:
         NUM_CLASS = len(labels_dict)  # get number of class to one-hot-encoding
