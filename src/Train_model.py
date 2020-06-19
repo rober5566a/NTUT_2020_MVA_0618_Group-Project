@@ -7,9 +7,9 @@ from Model.CNN import CNN
 # model = CNN().to('cuda:0')
 
 
-def train_model(device, EPOCH, train_loader, test_datasets, model=None, printHistory=True):
+def train_model(device, EPOCH, train_loader, test_datasets, model=CNN().to('cuda:0'), printHistory=True):
 
-    model = CNN().to(device)
+    # model = CNN().to('cuda:0')
     # test_datasets import to the device
     test_datas = test_datasets.datas.clone().detach().type(torch.float32)
     test_labels = test_datasets.labels.clone().detach().type(torch.int64)
