@@ -34,7 +34,10 @@ def draw_plot(EPOCH, train_loss_ls, train_acc_ls, test_acc_ls, save_path='out/')
         i += 1
         if i % 10 == 0 or i == EPOCH+1:
             if e != 1:
-                e = np.round((e.cpu()).detach().numpy(), 3)
+                try:
+                    e = np.round((e.to('cpu')).detach().numpy(), 3)
+                except AttributeError:
+                    e = np.round(e, 3)
             plt.text(d, e, e,
                      ha='center', va='bottom', fontsize=10)
     plt.plot(EPOCH_times, test_acc_ls, marker='o',

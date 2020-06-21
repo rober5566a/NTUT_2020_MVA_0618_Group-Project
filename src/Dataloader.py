@@ -75,7 +75,7 @@ def organize_dataset(filenames, img_h, img_w, isTrain=False, isOneHotEncod=False
 
         if isTrain is True:
             # use raw-img increase img by dip
-            pre_imgs = dip_pre_process(raw_img, num_create=20)
+            pre_imgs = dip_pre_process(raw_img, num_create=50)
             # # print(type(img))
             for img in pre_imgs:
                 img = torch.from_numpy(img)

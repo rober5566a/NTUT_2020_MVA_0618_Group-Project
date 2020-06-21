@@ -13,8 +13,6 @@ def change_HSV_V(img, v_value=0):
 
     output_hsv = img_dip.merge_channels(h, s, v)
     output_img = cv2.cvtColor(output_hsv, cv2.COLOR_HSV2BGR)
-    output_img = np.reshape(output_img,
-                            (1, output_img.shape[0], output_img.shape[1], output_img.shape[2]))
 
     return output_img
 
@@ -27,10 +25,13 @@ def rotate(img, angle, center=None, scale=1.0):
 
     M = cv2.getRotationMatrix2D(center, angle, scale)
     output_img = cv2.warpAffine(img, M, (w, h))
-    output_img = np.reshape(output_img,
-                            (1, output_img.shape[0], output_img.shape[1], output_img.shape[2]))
-
+    # cv2.imshow('img', output_img)
+    # cv2.waitKey(0)
     return output_img
+
+
+def get_reshape_img(img):
+    return np.reshape(img, (1, img.shape[0], img.shape[1], img.shape[2]))
 
 
 def try_append(imgs, img):
@@ -43,7 +44,7 @@ def try_append(imgs, img):
 
 
 def dip_pre_process(img, num_create=1):
-    imgs = np.array([], dtype='uint8')
+    imgs = get_reshape_img(img)
 
     hsv_v_values = []
     rotate_values = []
@@ -51,13 +52,21 @@ def dip_pre_process(img, num_create=1):
         hsv_v_values.append(random.randint(-100, 100))
         rotate_values.append(random.randint(-180, 180))
 
+        # hsv_img = change_HSV_V(img, v_value=hsv_v_values[i])
+        # rotate_img = rotate(hsv_img, angle=rotate_values[i])
+        # output_img = get_reshape_img(rotate_img)
+
+        # imgs = try_append(imgs, output_img)
+
     for hsv_v_value in hsv_v_values:
         hsv_img = change_HSV_V(img, v_value=hsv_v_value)
-        imgs = try_append(imgs, hsv_img)
+        output_img = get_reshape_img(hsv_img)
+        imgs = try_append(imgs, output_img)
 
     for rotate_value in rotate_values:
-        rotate_img = rotate(img, angle=rotate_value)
-        imgs = try_append(imgs, rotate_img)
+        rotate_img = rotate(hsv_img, angle=rotate_value)
+        output_img = get_reshape_img(rotate_img)
+        imgs = try_append(imgs, output_img)
 
     return imgs
 

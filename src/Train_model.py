@@ -22,7 +22,7 @@ def train_model(device, EPOCH, train_loader, test_datasets, model=CNN().to('cuda
     train_loss_ls = []
     train_acc_ls = []
     test_acc_ls = []
-    for epoch in range(EPOCH):
+    for epoch in range(1, EPOCH+1):
         print("EPOCH: ", epoch)
 
         total = 0

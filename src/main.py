@@ -27,7 +27,7 @@ if __name__ == "__main__":
         dataset=train_datasets,
         batch_size=6,
         shuffle=True,
-        num_workers=2
+        num_workers=0
     )
 
     cnn = CNN().to(device_0)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     EPOCH = 30
     history = train_model(device_0, EPOCH,
                           train_loader, test_datasets, model=cnn)
-    # torch.save(cnn.state_dict(), 'out/cnn-model.pkl')
+    torch.save(cnn.state_dict(), 'out/cnn-model.pkl')
     (train_loss_ls, train_acc_ls, test_acc_ls) = history
     draw_plot(EPOCH, train_loss_ls, train_acc_ls,
               test_acc_ls, save_path='out/')
